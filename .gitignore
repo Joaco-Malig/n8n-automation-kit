@@ -2,13 +2,13 @@
 .env
 .env.local
 .env.*
+!.env.example
 *api-key*
 *api_key*
 *.credentials
 
-# MCP con credenciales reales — nunca subir al repo
-# El template está en .mcp.json.example
-.mcp.json
+# .mcp.json AHORA es seguro versionar: usa ${VAR} y los secretos
+# viven en .env (ignorado). Se versiona para que el template quede listo.
 
 # Workflows personales — no se comparten (tienen IDs de credenciales específicos)
 workflows/*.json
