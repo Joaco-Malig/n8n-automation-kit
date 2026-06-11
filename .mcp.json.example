@@ -1,69 +1,64 @@
 {
+  "_comment_intro": "=== Plantilla de .mcp.json para WINDOWS — copia/edita y guarda como .mcp.json ===",
+  "_comment_secrets": "Los secretos NO van aqui. Van en .env (o en variables de usuario de Windows con setx). Aqui solo se referencian con ${VAR}.",
+
   "mcpServers": {
-    "_comment_required": "=== REQUERIDOS — mínimo para el kit ===",
+    "_comment_required": "=== REQUERIDO — minimo para el kit ===",
 
     "n8n-mcp": {
-      "command": "npx",
-      "args": ["-y", "n8n-mcp"],
+      "command": "cmd",
+      "args": ["/c", "npx", "-y", "n8n-mcp"],
       "env": {
-        "N8N_API_URL": "https://YOUR_N8N_URL/",
-        "N8N_API_KEY": "YOUR_N8N_API_KEY",
+        "N8N_API_URL": "${N8N_API_URL}",
+        "N8N_API_KEY": "${N8N_API_KEY}",
         "MCP_MODE": "stdio",
         "LOG_LEVEL": "error",
         "DISABLE_CONSOLE_OUTPUT": "true"
       }
     },
 
-    "_comment_playwright": "=== PLAYWRIGHT — Elegir UN modo (A o B, no ambos) ===",
-
-    "_comment_playwright_mode_a": "Modo A: Playwright lanza Chrome con perfil persistente (RECOMENDADO para debug con sesión activa)",
+    "_comment_playwright": "=== PLAYWRIGHT (opcional) — perfil de Chrome DEDICADO en Windows ===",
     "playwright": {
-      "command": "npx",
+      "command": "cmd",
       "args": [
+        "/c",
+        "npx",
         "@playwright/mcp@latest",
         "--browser=chrome",
-        "--user-data-dir=/Users/YOUR_MACOS_USERNAME/Library/Application Support/Google/Chrome/YOUR_CHROME_PROFILE"
+        "--user-data-dir=${CHROME_USER_DATA_DIR:-C:\\Users\\TU_USUARIO\\AppData\\Local\\Google\\Chrome\\PlaywrightProfile}"
       ]
     },
 
-    "_comment_playwright_mode_b": "Modo B: Conectar a Chrome ya corriendo con CDP (descomentar y comentar Modo A si prefieres este)",
-    "_playwright_cdp_disabled": {
-      "command": "npx",
-      "args": [
-        "@playwright/mcp@latest",
-        "--cdp-endpoint=http://localhost:9222"
-      ]
-    },
-    "_comment_playwright_cdp_launch": "Para Modo B, lanzar Chrome manualmente primero: /Applications/Google\\ Chrome.app/Contents/MacOS/Google\\ Chrome --remote-debugging-port=9222 --user-data-dir='/Users/YOUR_USER/Library/Application Support/Google/Chrome/YOUR_PROFILE'",
-
-    "_comment_optional": "=== OPCIONALES — Agregar según necesidad ===",
+    "_comment_optional": "=== OPCIONALES — descomenta y agrega la var al .env si los usas ===",
 
     "coolify": {
-      "command": "npx",
-      "args": ["-y", "@masonator/coolify-mcp"],
+      "command": "cmd",
+      "args": ["/c", "npx", "-y", "@masonator/coolify-mcp"],
       "env": {
-        "COOLIFY_ACCESS_TOKEN": "YOUR_COOLIFY_API_TOKEN",
-        "COOLIFY_BASE_URL": "https://YOUR_COOLIFY_URL/"
+        "COOLIFY_ACCESS_TOKEN": "${COOLIFY_ACCESS_TOKEN}",
+        "COOLIFY_BASE_URL": "${COOLIFY_BASE_URL}"
       }
     },
 
     "supabase": {
-      "command": "npx",
+      "command": "cmd",
       "args": [
+        "/c",
+        "npx",
         "-y",
         "@supabase/mcp-server-supabase@latest",
-        "--project-ref=YOUR_SUPABASE_PROJECT_REF"
+        "--project-ref=${SUPABASE_PROJECT_REF}"
       ],
       "env": {
-        "SUPABASE_ACCESS_TOKEN": "YOUR_SUPABASE_ACCESS_TOKEN"
+        "SUPABASE_ACCESS_TOKEN": "${SUPABASE_ACCESS_TOKEN}"
       }
     },
 
     "github": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "command": "cmd",
+      "args": ["/c", "npx", "-y", "@modelcontextprotocol/server-github"],
       "env": {
-        "GITHUB_PERSONAL_ACCESS_TOKEN": "YOUR_GITHUB_PAT"
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}"
       }
     }
   }

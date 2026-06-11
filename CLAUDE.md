@@ -11,9 +11,9 @@
 
 ### ¿Dónde está tu instancia de n8n?
 
-- **URL de n8n:** <!-- Ejemplo: https://n8n.tudominio.com -->
-- **Método de autenticación:** <!-- API Key / Basic Auth / Sin auth (local dev) -->
-- **Versión de n8n:** <!-- Ejecuta en tu VPS: n8n --version, o revisa Settings > About -->
+- **URL de n8n:** https://n8n.joacomalig.com/
+- **Método de autenticación:** API Key (n8n Public API — header `X-N8N-API-KEY`). La key NO se escribe aquí: vive en `.env` o en las variables de usuario de Windows (`setx N8N_API_KEY`).
+- **Versión de n8n:** <!-- rellenar: Settings > About -->
 
 ### ¿Usas Coolify como orquestador?
 
@@ -39,7 +39,7 @@
 ### ¿Tienes Chrome profile configurado para Playwright?
 
 - **Perfil Chrome creado:** <!-- Sí / No -->
-- **Directorio del perfil:** <!-- Ejemplo: Profile 2 (resultado de ls ~/Library/.../Chrome/) -->
+- **Directorio del perfil:** <!-- Windows: C:\Users\TU_USUARIO\AppData\Local\Google\Chrome\User Data\Profile X (o un perfil dedicado: ...\Chrome\PlaywrightProfile) -->
 - **Servicios con login guardado en ese perfil:** <!-- n8n, Coolify, otros -->
 
 ---

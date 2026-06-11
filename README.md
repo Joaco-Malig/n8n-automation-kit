@@ -10,11 +10,14 @@ Creado por [Carlos Domínguez](https://github.com/Carlos-Dominguez-faber) — [I
 
 ```
 n8n-automation-kit/
-├── .mcp.json                        ← Template de MCPs (editar con tus credenciales)
+├── .mcp.json                        ← Config de MCPs (versionada, usa ${VAR}, sin secretos)
+├── .env.example                     ← Plantilla de credenciales → copiar a .env (ignorado)
+├── start.ps1                        ← Lanzador Windows: carga .env y abre Claude Code
 ├── CLAUDE.md                        ← Cuestionario de contexto para Claude (rellenar)
 ├── MEMORY.md                        ← Sistema de autoaprendizaje (Claude lo actualiza solo)
-├── skills/
-│   ├── n8n-coolify-fullstack/       ← Skill exclusiva — instalar en ~/.claude/skills/
+├── .claude/skills/                  ← Skills a nivel proyecto (se cargan solas, no globales)
+├── skills/                          ← Copia distribuible de las skills (referencia)
+│   ├── n8n-coolify-fullstack/       ← Skill exclusiva del kit
 │   ├── make-to-n8n/                 ← Skill para migrar escenarios Make → n8n
 │   └── n8n-sdk-rules/               ← Reglas canónicas del @n8n/workflow-sdk oficial
 ├── agents/
@@ -34,70 +37,69 @@ n8n-automation-kit/
 
 ## Inicio en 3 pasos
 
-### Paso 1 — Clonar y abrir en Claude Code
+### Paso 1 — Obtener el kit y abrir en Claude Code
 
-```bash
-git clone https://github.com/Carlos-Dominguez-faber/n8n-automation-kit mi-proyecto-n8n
+**Opción A — clonar (Windows / PowerShell):**
+```powershell
+git clone https://github.com/Joaco-Malig/n8n-automation-kit mi-proyecto-n8n
 cd mi-proyecto-n8n
-claude   # Abrir Claude Code desde aquí
 ```
 
-> **Por qué trabajar desde este directorio:** Claude Code lee el `.mcp.json`, `CLAUDE.md` y `MEMORY.md` desde la raíz del proyecto. Al abrir Claude Code aquí, ya tiene todo el contexto configurado.
+**Opción B — copia manual:** copia la carpeta del kit en el Explorador y renómbrala con el nombre del proyecto. A diferencia de `git clone`, la copia manual **sí incluye tu `.env`** (con la conexión a n8n ya lista).
 
-### Paso 2 — Instalar las skills
+> **Por qué trabajar desde este directorio:** Claude Code lee `.mcp.json`, `CLAUDE.md`, `MEMORY.md` y `.claude/skills/` desde la raíz del proyecto. La carpeta copiada del kit **es** la raíz del proyecto — no la metas como subcarpeta de otra carpeta.
 
-```bash
-cp -r skills/n8n-coolify-fullstack ~/.claude/skills/
-cp -r skills/make-to-n8n ~/.claude/skills/
-cp -r skills/n8n-sdk-rules ~/.claude/skills/
-```
+### Paso 2 — Las skills ya vienen incluidas
 
-Reinicia Claude Code. Las skills aparecen disponibles automáticamente.
+Este kit trae las skills **a nivel de proyecto** en `.claude/skills/` (no globales). Se cargan solas al abrir Claude Code en esta carpeta — no hay que copiarlas a `~/.claude/skills/`.
+
+> Las otras skills de n8n (`n8n-workflow-patterns`, etc.) vienen del marketplace de Claude Code y están disponibles de forma global.
 
 ### Paso 3 — Configurar tus credenciales
 
-**3a. Copiar el template de MCP y rellenar con tus datos:**
+`.mcp.json` ya está versionado y usa `${VAR}` — **no contiene secretos**. Los secretos van en `.env` (ignorado por git) o en variables de usuario de Windows.
 
-```bash
-cp .mcp.json.example .mcp.json
+**3a. Copiar el template de entorno y rellenarlo:**
+
+```powershell
+Copy-Item .env.example .env
 ```
 
-> `.mcp.json` está en `.gitignore` — tus credenciales nunca se subirán al repo.
-
-Editar `.mcp.json` y reemplazar los placeholders:
-
-```json
-{
-  "mcpServers": {
-    "n8n-mcp": {
-      "env": {
-        "N8N_API_URL": "https://TU_N8N_URL/",   ← la / al final es obligatoria
-        "N8N_API_KEY": "TU_API_KEY"
-      }
-    }
-  }
-}
+Editar `.env` y poner tu instancia:
+```
+N8N_API_URL=https://TU_N8N_URL/     # la / al final es obligatoria
+N8N_API_KEY=TU_API_KEY
 ```
 
 Para obtener tu API key: **n8n → Settings → API → Enable API → Create API Key**
 
-**3b. Rellenar `CLAUDE.md`** — las secciones 1, 2 y 3 son las más importantes:
+**3b. Hacer que Claude Code vea esas variables.** Claude Code NO lee `.env` por sí solo; las variables deben estar en el entorno antes de lanzar `claude`. Dos formas:
+
+- **Lanzador (por proyecto):** abre Claude con el script incluido, que carga el `.env`:
+  ```powershell
+  .\start.ps1
+  ```
+- **Variables fijas (una sola instancia de n8n para todo):** una sola vez en tu PC:
+  ```powershell
+  setx N8N_API_URL "https://TU_N8N_URL/"
+  setx N8N_API_KEY "TU_API_KEY"
+  ```
+  Desde ahí, `claude` directo funciona en cualquier proyecto con este `.mcp.json`.
+
+**3c. Rellenar `CLAUDE.md`** — las secciones 1, 2 y 3 son las más importantes:
 - Sección 1: tu URL de n8n, si usas Coolify, microservicios activos
 - Sección 2: nombre del proyecto, proceso que automatizas, reglas de negocio
 - Sección 3: credenciales disponibles en n8n (nombres exactos), nodos que más usas
 
-**3c. Configurar Playwright con tu perfil de Chrome** (para validación E2E con sesión activa):
+**3d. Configurar Playwright con tu perfil de Chrome** (opcional — para validación E2E con sesión activa):
 
-```bash
-# Encontrar tu perfil de Chrome
-ls ~/Library/Application\ Support/Google/Chrome/ | grep -i profile
-# Output ejemplo: Profile 2
+Los perfiles de Chrome en Windows están en `C:\Users\TU_USUARIO\AppData\Local\Google\Chrome\User Data\`. Crea un perfil **dedicado** (recomendado, para evitar el bloqueo "perfil en uso") e indica su ruta vía la variable `CHROME_USER_DATA_DIR` en tu `.env`:
 
-# En .mcp.json → reemplazar en la sección "playwright":
-# --user-data-dir=/Users/TU_USUARIO/Library/Application Support/Google/Chrome/Profile 2
+```
+CHROME_USER_DATA_DIR=C:\Users\TU_USUARIO\AppData\Local\Google\Chrome\PlaywrightProfile
 ```
 
-> Antes de usar Playwright: crea un perfil Chrome dedicado, inicia sesión en tu n8n y Coolify en ese perfil, y usa esa ruta en el .mcp.json. Así Playwright ya tiene sesión activa cada vez que lo usa Claude.
+> Antes de usar Playwright: en ese perfil dedicado, inicia sesión en tu n8n y Coolify. Así Playwright ya tiene sesión activa cada vez que lo usa Claude.
 
 ---
 
@@ -239,18 +241,14 @@ Hay un workflow base en `workflows/starters/webhook-router-starter.json` — un 
 
 ## Coolify MCP (opcional)
 
-Si usas Coolify para alojar n8n y tus microservicios, agrega el MCP de Coolify en `.mcp.json`:
+Si usas Coolify para alojar n8n y tus microservicios, ya hay un bloque `coolify` listo en `.mcp.json.example` (forma Windows, `cmd /c npx`). Cópialo a tu `.mcp.json` y agrega las variables al `.env`:
 
-```json
-"coolify": {
-  "command": "npx",
-  "args": ["-y", "@masonator/coolify-mcp"],
-  "env": {
-    "COOLIFY_ACCESS_TOKEN": "TU_TOKEN",
-    "COOLIFY_BASE_URL": "https://coolify.tudominio.com/"
-  }
-}
 ```
+COOLIFY_ACCESS_TOKEN=TU_TOKEN
+COOLIFY_BASE_URL=https://coolify.tudominio.com/
+```
+
+El bloque en `.mcp.json` las referencia con `${COOLIFY_ACCESS_TOKEN}` / `${COOLIFY_BASE_URL}` — sin secretos en el archivo.
 
 Token en: **Coolify → Profile → API Tokens → Create**
 
